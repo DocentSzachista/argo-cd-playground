@@ -1,0 +1,23 @@
+{{- range .Values.apps }}
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: {{ .name }}-limitrange
+  namespace: {{ .name }}
+spec:
+  limits:
+    - type: Container
+      min:
+        cpu: {{ .limitRange.cpu.min }}
+        memory: {{ .limitRange.memory.min }}
+      max:
+        cpu: {{ .limitRange.cpu.max }}
+        memory: {{ .limitRange.memory.max }}
+      default:
+        cpu: {{ .limitRange.cpu.default }}
+        memory: {{ .limitRange.memory.default }}
+      defaultRequest:
+        cpu: {{ .limitRange.cpu.defaultRequest }}
+        memory: {{ .limitRange.memory.defaultRequest }}
+---
+{{- end }}

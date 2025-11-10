@@ -1,0 +1,13 @@
+apps:
+  - name: myapp
+    limitRange:
+      cpu:
+        min: "100m"
+        max: "1"
+        default: "500m"
+        defaultRequest: "250m"
+      memory:
+        min: "128Mi"
+        max: "1Gi"
+        default: "512Mi"
+        defaultRequest: "256Mi"

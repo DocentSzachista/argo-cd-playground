@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hello-world-prod
+  namespace: argocd
+spec:
+  project: my-project
+
+  source:
+    repoURL: https://github.com/DocentSzachista/argo-cd-playground
+    targetRevision: test
+    path: charts/limits
+    helm:
+    # in real world use case scenario it would be divided in to two sources and value.yaml would be put into apps/limits dir
+      valueFiles:
+      - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: resource-admission
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true
