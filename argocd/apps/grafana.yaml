@@ -11,7 +11,7 @@ spec:
       elements:
         - appName: grafana
           chartURL: https://grafana.github.io/helm-charts
-          version: latest
+          version: 10.1.4
   template:
     metadata:
       name: '{{.appName}}-prod'
