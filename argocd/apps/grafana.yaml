@@ -21,7 +21,7 @@ spec:
       - repoURL: https://github.com/DocentSzachista/argo-cd-playground
         targetRevision: test
         ref: values
-      - chart: hello-world
+      - chart: '{{.appName}}'
         repoURL: '{{.chartURL}}'
         targetRevision: '{{.version}}'
         helm:
