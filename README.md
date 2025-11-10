@@ -60,7 +60,9 @@ Więcej o tym wraz z przykładami [tutaj](https://kubernetes.io/docs/tutorials/s
 
 W tym przypadku stworzyłbym helm charta dla łatwego zarządzania namespace'ami i zasobami każdej aplikacji który zawierałby dwa manifesty `Namespace` i `LimitRange` przyporządkowany do każdego namespace'a. Taka konfiguracja pomogłaby wymóc na każdym kontenerze posiadanie ograniczonych zasobów nawet jeżeli deweloper nie określi zasobów do jakich klaster będzie miał dostęp.
 
-Przykładowy helm chart który mógłby realizować to zadanie zamieściłem [tutaj](./charts/limits/)
+Przykładowy helm chart który mógłby realizować to zadanie zamieściłem [tutaj](./charts/limits/). Generuje on dla każdego namespace'a `LimitRange` określające minimalne, maksymalne wartości zasobów pamięci i CPU jakie może dany pod w namespace'ie posiadać. Definiuje również on wartości domyślne jakie pod będzie przyjmował, jeżeli nie zostaną one zdefiniowane w jego manifeście.
+
+
 
 
 
