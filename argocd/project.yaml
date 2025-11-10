@@ -5,12 +5,18 @@ metadata:
   namespace: argocd
 spec:
   description: "Sync window for all applications inside of this project. During buisness hours only manual sync is allowed."
-
   sourceRepos:
     - "*"
   destinations:
     - namespace: "*"
       server: "*"
+  clusterResourceWhitelist:
+    - group: "*"  # allow all API groups
+      kind: "*"   # allow all kinds
+  namespaceResourceWhitelist:
+    - group: "*"  # allow all namespaced API groups
+      kind: "*"   # allow all kindss
+
   syncWindows:
     - kind: allow
       schedule: "0 9 * * 1-5"
