@@ -30,7 +30,7 @@ spec:
         targetRevision: '{{.version}}'
         helm:
           valueFiles:
-          - $values/apps/prod/'{{.appName}}'/values.yaml
+          - $values/apps/prod/{{.appName}}/values.yaml
       destination:
         server: https://kubernetes.default.svc
         namespace: myapp
