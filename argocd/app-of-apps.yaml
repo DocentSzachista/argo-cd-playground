@@ -4,7 +4,7 @@ metadata:
   name: app-of-apps
   namespace: argocd
 spec:
-  project: default
+  project: my-project
   source:
     repoURL: 'https://github.com/DocentSzachista/argo-cd-playground'
     targetRevision: test
