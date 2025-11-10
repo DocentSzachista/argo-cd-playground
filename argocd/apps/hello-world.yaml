@@ -4,7 +4,7 @@ metadata:
   name: hello-world-prod
   namespace: argocd
 spec:
-  # project: my-project
+  project: my-project
 
   sources:
     - repoURL: https://github.com/DocentSzachista/argo-cd-playground
