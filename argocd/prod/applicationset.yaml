@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: prod-apps
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: grafana
+            chart: backend-chart
+            chartURL: https://artifacthub.io/packages/helm/grafana/grafana
+            valuesFile: apps/grafana/values.yaml
+            namespace: prod
+  template:
+    metadata:
+      name: '{{.name}}-prod'
+    spec:
+      project: default
+      sources:
+        - repoURL: 'https://github.com/twoje-repo/charts.git'
+          targetRevision: main
+          chart: '{{chart}}'
+          helm:
+            valueFiles:
+              - '{{valuesFile}}'
+        - repoURL: 'https://github.com/DocentSzachista/argo-cd-playground'
+          targetRevision: test
+          ref: values
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{.namespace}}'
+      syncOptions:
+        - CreateNamespace=true
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
