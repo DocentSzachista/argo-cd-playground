@@ -114,7 +114,7 @@ Znalazłaby się tutaj definicja zasobów `AppProjects` w których zdefiniowałb
 - uprawnienia i reguły dostepu
 - `SyncWindow` dla wyłączenia automatycznej synchronizacji w tzw `buisness hours` czyli, żeby nowa wersja aplikacji nie została wypuszczona w czasie największego ruchu aplikacji.
 
-Przykładowy AppProject z zastosowaniem `syncWindow` w czasie godzin biznesowych (9-17 czasu polskiego) zamieściłem [tutaj](./argocd/project.yaml)
+Przykładowy AppProject z zastosowaniem `syncWindow` w czasie godzin biznesowych (9-17 czasu polskiego) zamieściłem [tutaj](./projects/my-project.yaml)
 
 ### `applications`
 
@@ -128,31 +128,29 @@ metadata:
   namespace: argocd
 spec:
   project: my-project
-
   sources:
     - repoURL: https://github.com/DocentSzachista/argo-cd-playground
-      targetRevision: test
+      targetRevision: master
       ref: values
     - chart: hello-world
       repoURL: https://helm.github.io/examples
       targetRevision: 0.1.0
       helm:
         valueFiles:
-        - $values/apps/prod/hello-world/values.yaml
+        - $values/environment/prod/hello-world/values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: myapp
-
   syncPolicy:
     automated:
       selfHeal: true
       prune: true
 ```
-Wykorzystuje dwa źródła, jedno jest repozytorium, które przetrzymuje helm chart aplikacji a drugie jest repozytorium od argocd które przekazuje ścieżkę do pliku values za pośrednictwem `ref: values`.
-Ten plik został równiez zamieszczony [tutaj](./)
+Application hello-world-prod tworzy aplikacje z helm charta na namespace myapp. Wykorzystuje dwa źródła, jedno jest repozytorium, które przetrzymuje helm chart aplikacji a drugie jest repozytorium od argocd które przekazuje ścieżkę do pliku values za pośrednictwem `ref: values`.
+Ten plik został równiez zamieszczony [tutaj](./applications/apps/hello-world.yaml)
 
 
-Dla automatycznego wdrażania nowo dodanych obiektów `Applications` stworzyłbym plik `app-of-apps.yaml` który zawierałby obiekt `applications` który wskazywałby na folder `apps` w repozytorium. Dzięki temu możliwe by było dodawanie z automatu nowych aplikacji bez konieczności wywoływania komend `kubectl` czy `argocd`. Przykładowy manifest stworzyłem [tutaj](./)
+Dla automatycznego wdrażania nowo dodanych obiektów `Applications` stworzyłbym plik `app-of-apps.yaml` który zawierałby obiekt `applications` który wskazywałby na folder `apps` w repozytorium. Dzięki temu możliwe by było dodawanie z automatu nowych aplikacji bez konieczności wywoływania komend `kubectl` czy `argocd`. Przykładowy manifest stworzyłem [tutaj](./applications/app-of-apps.yaml).
 Ważną rolę w tym manifeście którą opisałem wyżej odpowiada następujący fragment:
 ```yaml
 source:

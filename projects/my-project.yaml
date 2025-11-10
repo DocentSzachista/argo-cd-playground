@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: my-project
+  namespace: argocd
+spec:
+  description: "Sync window for all applications inside of this project. During buisness hours only manual sync is allowed."
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: "*"
+      server: "*"
+  clusterResourceWhitelist:
+    - group: "*"  # allow all API groups
+      kind: "*"   # allow all kinds
+  syncWindows:
+    - kind: allow
+      schedule: "0 9 * * 1-5"
+      duration: 8h
+      applications:
+        - "*"
+      clusters:
+        - "*"
+      namespaces:
+        - "*"
+      manualSync: true
+      timeZone: "Europe/Warsaw"
+    - kind: allow
+      schedule: "0 17 * * 1-5"
+      duration: 7h
+      applications:
+        - "*"
+      clusters:
+        - "*"
+      namespaces:
+        - "*"
+      manualSync: false
+      timeZone: "Europe/Warsaw"
+    - kind: allow
+      schedule: "0 17 * * 1-5"
+      duration: 7h
+      applications:
+        - "*"
+      clusters:
+        - "*"
+      namespaces:
+        - "*"
+      manualSync: true
+      timeZone: "Europe/Warsaw"

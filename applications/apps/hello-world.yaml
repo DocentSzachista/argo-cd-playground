@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hello-world-prod
+  namespace: argocd
+spec:
+  project: my-project
+  sources:
+    - repoURL: https://github.com/DocentSzachista/argo-cd-playground
+      targetRevision: master
+      ref: values
+    - chart: hello-world
+      repoURL: https://helm.github.io/examples
+      targetRevision: 0.1.0
+      helm:
+        valueFiles:
+        - $values/environment/prod/hello-world/values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: myapp
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
