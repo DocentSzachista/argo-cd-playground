@@ -22,7 +22,7 @@ spec:
         ref: values
       - chart: hello-world
         repoURL: '{{.chartURL}}'
-        targetRevision: '{{.version}}''
+        targetRevision: '{{.version}}'
         helm:
           valueFiles:
           - $values/apps/prod/'{{.appName}}'/values.yaml
