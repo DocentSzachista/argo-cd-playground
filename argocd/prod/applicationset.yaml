@@ -4,6 +4,8 @@ metadata:
   name: prod-apps
   namespace: argocd
 spec:
+  goTemplates: true
+  goTemplateOptions: ["missingkey=error"]
   generators:
     - list:
         elements:
@@ -14,24 +16,22 @@ spec:
             namespace: prod
   template:
     metadata:
-      name: '{{.name}}-prod'
+      name: '{{.name | lower }}-prod'
     spec:
       project: default
       sources:
-        - repoURL: 'https://github.com/twoje-repo/charts.git'
+        - repoURL: '{{.chartURL}}'
           targetRevision: main
           chart: '{{chart}}'
           helm:
             valueFiles:
-              - $values/{{valuesFile}}'
+              - $values/{{.valuesFile}}
         - repoURL: 'https://github.com/DocentSzachista/argo-cd-playground'
           targetRevision: test
           ref: values
       destination:
         server: 'https://kubernetes.default.svc'
         namespace: '{{.namespace}}'
-      syncOptions:
-        - CreateNamespace=true
       syncPolicy:
         automated:
           prune: true
