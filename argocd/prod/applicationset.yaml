@@ -23,7 +23,7 @@ spec:
           chart: '{{chart}}'
           helm:
             valueFiles:
-              - '{{valuesFile}}'
+              - $values/{{valuesFile}}'
         - repoURL: 'https://github.com/DocentSzachista/argo-cd-playground'
           targetRevision: test
           ref: values
@@ -32,7 +32,6 @@ spec:
         namespace: '{{.namespace}}'
       syncOptions:
         - CreateNamespace=true
-
       syncPolicy:
         automated:
           prune: true
