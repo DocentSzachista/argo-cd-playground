@@ -14,7 +14,8 @@ spec:
       repoURL: https://helm.github.io/examples
       targetRevision: 0.1.0
       helm:
-      - $values/apps/prod/hello-world/values.yaml
+        valueFiles:
+        - $values/apps/prod/hello-world/values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: myapp
