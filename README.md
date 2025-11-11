@@ -177,7 +177,98 @@ Przechowuje pliki definujące połączenie z klastrem kubernetes w postaci sekre
 
 ## 4. Potok CD w repozytorium
 
-Dla pełnej automatyzacji procesu jak już aplikacja byłaby wdrożona do ArgoCD, to dodałbym możliwość po zrobieniu przez CI release'a nowego obrazu dockerowego trigger / skrypt, który wpierw przeskanuje obraz dockerowy pod kątem **podatności bezpieczeństwa**, a następnie, jeżeli nie wykryje żadnych krytycznych podatności, to  zmodyfikuje tag obrazu w pliku `values.yaml` na repozytorium ArgoCD (przykładowo modyfikacja pliku w `environment/production/app1/values.yaml`).
+Dla pełnej automatyzacji procesu jak już aplikacja byłaby wdrożona do ArgoCD, to dodałbym możliwość po zrobieniu przez CI release'a nowego obrazu dockerowego trigger / skrypt, który wpierw przeskanuje obraz dockerowy pod kątem **podatności bezpieczeństwa**, a następnie, jeżeli nie wykryje żadnych krytycznych podatności, to  zmodyfikuje tag obrazu w pliku `values.yaml` na repozytorium ArgoCD (przykładowo modyfikowanie wartości `.Values.image.tag` w [`environment/production/app1/values.yaml`](./environment/prod/hello-world/values.yaml)).
+
+
+### Github akcja do wykonania zadania
+
+Każde repo aplikacji zawierałoby workflow zawierający taki zbiór akcji:
+
+```yaml
+on:
+  release:
+
+jobs:
+  trivy_scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Login to Docker registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io # Tutaj rejestr dockerowy organizacji
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Pull Docker image
+        run: docker pull ghcr.io/${{github.repository}}:${{ github.event.release.tag_name}}
+
+      - name: Run Trivy scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "ghcr.io/${{github.repository}}:${{github.event.release.tag_name}}"
+          format: "table"
+          exit-code: 1
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH"
+
+  deploy_to_production:
+    needs: trivy_scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout argoCD repository
+        uses: actions/checkout@v4
+        repository: "<argocd-repo>"
+        token: ${{ secrets.GITHUB_AUTH_TOKEN }}
+        path: 'argocd'
+      - name: Change image tag in argo repository
+        run: |
+          FILE="argocd/environment/<app>/values.yaml"
+          NEW_TAG='${{github.event.release.tag_name}}'
+          yq eval ".images.tag = \"${NEW_TAG}\"" -i "$FILE")
+      - name: Commit changes to github repo
+        env:
+          CI_COMMIT_MESSAGE: "Update image tag for <app> on prod environment"
+          CI_COMMIT_AUTHOR: github-actions[bot]
+          CI_COMMIT_EMAIL: username@users.noreply.github.com
+        run: |
+          cd argocd
+          git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
+          git config --global user.email "${{ env.CI_COMMIT_EMAIL }}"
+            # Changes
+          git checkout -b bot/update-<app>-tag
+          git add ./environment/<app>/values.yaml
+          git commit -m "${{ env.CI_COMMIT_MESSAGE }}"
+          git push --set-upstream origin bot/update-<app>-tag
+```
+
+Powyższy workflow wykonywałby się tylko w przypadku tworzenia release'u Zawiera w sobie dwa joby:
+
+- `trivy scan`.
+- `deploy-to-production`
+
+#### `Trivy-scan`
+Dla uzyskania dostępu do rejestru dockerowego skonfigurowałbym dane do logowania i zapisał je w sekretach Github actions dla bezpiecznego do nich dostępu przez workflow.
+
+Dzięki temu mogę pobrać już zbudowany obraz przez inną akcję i przeprowadzić jej skan za pomocą trivy
+
+Skan jest przeprowadzany w poszukiwaniu podatności `CRITICAL` i `HIGH`. Jeżeli zostaną takie znalezione akcja zakończy się niepowodzeniem i nie przejdzie do kolejnego joba
+#### `deploy-to-production`
+Job ten wykonuje następujące rzeczy:
+- pulluje repozytorium githubowe ArgoCD
+- zmienia tag obrazu aplikacji na nowy release
+- Tworzy nowy branch, dodaje do niego commita i wypycha go do repozytorium na Githubie
+
+Aby się to zadanie powiodło należy skonfigurować [`Github App`](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/about-creating-github-apps) i wygenerowany token zapisać jako secret w repozytorium.
+
+
+
+
+
+
+
+
+
 
 
 ## Jak wyglądałby flow CD z punktu widzenia developera:
